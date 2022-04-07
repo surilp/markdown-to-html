@@ -1,0 +1,5 @@
+P_START = "<p>"
+P_END = "</p>"
+
+HEADER_IDENTIFIER = "#"
+LINK_IDENTIFIER = "["
