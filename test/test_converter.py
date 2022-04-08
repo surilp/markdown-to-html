@@ -10,7 +10,7 @@ class MarkdownToHTMLConverterTest(TestCase):
         actual = html_converter._header_logic(markdown, 0, len(markdown))
         self.assertEqual(expected, actual)
 
-    def test_header_1_in_correct_syntax_logic(self):
+    def test_header_1_incorrect_syntax_logic(self):
         markdown = "#Heading 1"
         expected = "<p>#Heading 1</p>"
         actual = html_converter._header_logic(markdown, 0, len(markdown))
@@ -58,6 +58,12 @@ class MarkdownToHTMLConverterTest(TestCase):
         actual = html_converter._link_logic(markdown, 0, len(markdown))
         self.assertEqual(expected, actual)
 
+    def test_link_incorrect_syntax_logic(self):
+        markdown = "[Link text] (https://www.example.com)"
+        expected = '<p>[Link text] (https://www.example.com)</p>'
+        actual = html_converter._link_logic(markdown, 0, len(markdown))
+        self.assertEqual(expected, actual)
+
     def test_blank_line(self):
         markdown = ""
         expected = ""
@@ -77,7 +83,7 @@ This is sample markdown for the [Mailchimp](https://www.mailchimp.com) homework 
 <p>Hello!</p>
 
 <p>This is sample markdown for the <a href="https://www.mailchimp.com">Mailchimp</a> homework assignment.</p>'''
-        actual = '\n'.join(html_converter.convert_multi_string_markdown(markdowns))
+        actual = html_converter.convert_multi_string_markdown(markdowns)
         self.assertEqual(expected, actual)
 
     def test_multi_string_markdown_2(self):
@@ -107,5 +113,5 @@ What's going on?</p>
 <p>This is a paragraph <a href="http://google.com">with an inline link</a>. Neat, eh?</p>
 
 <h2>This is a header <a href="http://yahoo.com">with a link</a></h2>'''
-        actual = '\n'.join(html_converter.convert_multi_string_markdown(markdowns))
+        actual = html_converter.convert_multi_string_markdown(markdowns)
         self.assertEqual(expected, actual)
