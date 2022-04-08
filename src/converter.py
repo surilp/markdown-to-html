@@ -6,7 +6,8 @@ class MarkdownToHTMLConverter:
     @staticmethod
     def convert_multi_string_markdown(markdowns):
         result = []
-        markdowns = markdowns.split('\n')
+        if isinstance(markdowns, str):
+            markdowns = markdowns.split('\n')
         n = len(markdowns)
         for idx, markdown in enumerate(markdowns):
             if idx + 1 < n and markdowns[idx] != '' and markdowns[idx + 1] != '':
@@ -16,7 +17,7 @@ class MarkdownToHTMLConverter:
             else:
                 output = MarkdownToHTMLConverter.convert(markdown)
             result.append(output)
-        return result
+        return '\n'.join(result)
 
     @staticmethod
     def convert(markdown, tags=[P_START, P_END]):
