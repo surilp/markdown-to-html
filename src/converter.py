@@ -4,14 +4,28 @@ from src.conf import P_START, P_END, HEADER_IDENTIFIER, LINK_IDENTIFIER
 class MarkdownToHTMLConverter:
 
     @staticmethod
-    def convert(markdown):
-        n = len(markdown)
-        start = 0
-        end = n - 1
-        return MarkdownToHTMLConverter._converter(markdown, start, end)
+    def convert_multi_string_markdown(markdowns):
+        result = []
+        markdowns = markdowns.split('\n')
+        n = len(markdowns)
+        for idx, markdown in enumerate(markdowns):
+            if idx + 1 < n and markdowns[idx] != '' and markdowns[idx + 1] != '':
+                output = MarkdownToHTMLConverter.convert(markdown, tags=[P_START, ''])
+            elif idx > 0 and markdowns[idx-1] != '' and markdowns[idx] != '':
+                output = MarkdownToHTMLConverter.convert(markdown, tags=['', P_END])
+            else:
+                output = MarkdownToHTMLConverter.convert(markdown)
+            result.append(output)
+        return result
 
     @staticmethod
-    def _converter(string, start, end):
+    def convert(markdown, tags=[P_START, P_END]):
+        n = len(markdown)
+        start = 0
+        return MarkdownToHTMLConverter._converter(markdown, start, n,tags)
+
+    @staticmethod
+    def _converter(string, start, end, tags=[P_START, P_END]):
         if start >= end:
             return ''
         if string[start] == HEADER_IDENTIFIER:
@@ -19,7 +33,8 @@ class MarkdownToHTMLConverter:
         elif string[start] == LINK_IDENTIFIER:
             return MarkdownToHTMLConverter._link_logic(string, start, end)
         else:
-            return MarkdownToHTMLConverter._paragraph_logic(string, start, end)
+            return MarkdownToHTMLConverter._paragraph_logic(string, start, end, tags=tags)
+
 
     @staticmethod
     def _header_logic(string, start, end):
@@ -35,7 +50,7 @@ class MarkdownToHTMLConverter:
             result.append(remaining)
             return ''.join(result) + MarkdownToHTMLConverter._converter(string, start, end) + f'</h{cnt}>'
         else:  # if header syntax is not correct, it will be paragraph tag
-            return MarkdownToHTMLConverter._paragraph_logic(string, start, end, temp)
+            return MarkdownToHTMLConverter._paragraph_logic(string, start, end, pre=temp, tags=[P_START, P_END])
 
     @staticmethod
     def _until_special_character(string, start, end):
@@ -46,13 +61,14 @@ class MarkdownToHTMLConverter:
         return ''.join(result), start
 
     @staticmethod
-    def _paragraph_logic(string, start, end, pre=None):
-        result = [P_START]
+    def _paragraph_logic(string, start, end, pre=None, tags=[P_START, P_END]):
+        p_start, p_end = tags
+        result = [p_start]
         if pre:
             result.append(''.join(pre))
         remaining, start = MarkdownToHTMLConverter._until_special_character(string, start, end)
         result.append(remaining)
-        return ''.join(result) + MarkdownToHTMLConverter._converter(string, start, end) + P_END
+        return ''.join(result) + MarkdownToHTMLConverter._converter(string, start, end, tags=tags) + p_end
 
     @staticmethod
     def _link_logic(string, start, end):
@@ -78,6 +94,7 @@ class MarkdownToHTMLConverter:
         if start < end:
             link.append(')')
             start += 1
-            return '<a href="' + ''.join(link[1:-1]) + '">' + ''.join(title[1:-1]) + '</a>'
+            return '<a href="' + ''.join(link[1:-1]) + '">' + ''.join(
+                title[1:-1]) + '</a>' + MarkdownToHTMLConverter._converter(string, start, end, tags=['', ''])
         else:
             return P_START + ''.join(title) + ''.join(link) + P_END

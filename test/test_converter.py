@@ -10,6 +10,12 @@ class MarkdownToHTMLConverterTest(TestCase):
         actual = html_converter._header_logic(markdown, 0, len(markdown))
         self.assertEqual(expected, actual)
 
+    def test_header_1_in_correct_syntax_logic(self):
+        markdown = "#Heading 1"
+        expected = "<p>#Heading 1</p>"
+        actual = html_converter._header_logic(markdown, 0, len(markdown))
+        self.assertEqual(expected, actual)
+
     def test_header_2_logic(self):
         markdown = "## Heading 2"
         expected = "<h2>Heading 2</h2>"
@@ -56,4 +62,50 @@ class MarkdownToHTMLConverterTest(TestCase):
         markdown = ""
         expected = ""
         actual = html_converter.convert(markdown)
+        self.assertEqual(expected, actual)
+
+    def test_multi_string_markdown_1(self):
+        markdowns = \
+            '''# Sample Document
+
+Hello!
+
+This is sample markdown for the [Mailchimp](https://www.mailchimp.com) homework assignment.'''
+        expected = \
+            '''<h1>Sample Document</h1>
+
+<p>Hello!</p>
+
+<p>This is sample markdown for the <a href="https://www.mailchimp.com">Mailchimp</a> homework assignment.</p>'''
+        actual = '\n'.join(html_converter.convert_multi_string_markdown(markdowns))
+        self.assertEqual(expected, actual)
+
+    def test_multi_string_markdown_2(self):
+        markdowns = \
+            '''# Header one
+
+Hello there
+
+How are you?
+What's going on?
+
+## Another Header
+
+This is a paragraph [with an inline link](http://google.com). Neat, eh?
+
+## This is a header [with a link](http://yahoo.com)'''
+        expected = \
+            '''<h1>Header one</h1>
+
+<p>Hello there</p>
+
+<p>How are you?
+What's going on?</p>
+
+<h2>Another Header</h2>
+
+<p>This is a paragraph <a href="http://google.com">with an inline link</a>. Neat, eh?</p>
+
+<h2>This is a header <a href="http://yahoo.com">with a link</a></h2>'''
+        actual = '\n'.join(html_converter.convert_multi_string_markdown(markdowns))
         self.assertEqual(expected, actual)
